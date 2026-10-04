@@ -80,4 +80,3 @@ vim.b.plan_stats contains the latest statistics.
 User PlanUpdated fires after a render with data.buf identifying its buffer.
 
  vim:tw=78:ts=8:ft=help:norl:
-
