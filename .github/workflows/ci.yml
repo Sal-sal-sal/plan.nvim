@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            neovim: v0.10.4
+          - os: ubuntu-24.04
+            neovim: stable
+          - os: macos-15
+            neovim: stable
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install Rust checks
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt --component clippy
+          rustup override set stable
+      - name: Install Neovim on Linux
+        if: runner.os == 'Linux'
+        env:
+          NVIM_VERSION: ${{ matrix.neovim }}
+        run: |
+          curl -fL "https://github.com/neovim/neovim/releases/download/$NVIM_VERSION/nvim-linux-x86_64.tar.gz" -o nvim.tar.gz
+          tar -xzf nvim.tar.gz
+          echo "$PWD/nvim-linux-x86_64/bin" >> "$GITHUB_PATH"
+      - name: Install Neovim on macOS
+        if: runner.os == 'macOS'
+        run: brew install neovim tmux
+      - name: Install Lua formatter
+        env:
+          RUNNER_SYSTEM: ${{ runner.os }}
+        run: |
+          if [ "$RUNNER_SYSTEM" = "Linux" ]; then asset="stylua-linux-x86_64.zip"; else asset="stylua-macos-aarch64.zip"; fi
+          curl -fL "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/$asset" -o stylua.zip
+          mkdir -p .tools
+          unzip -q stylua.zip -d .tools
+          chmod +x .tools/stylua
+          echo "$PWD/.tools" >> "$GITHUB_PATH"
+      - name: Verify Rust and Neovim workflows
+        run: python3 scripts/verify.py

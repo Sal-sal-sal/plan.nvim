@@ -1,0 +1,11 @@
+/target/
+/bin/
+/dist/
+/doc/tags
+*.swp
+*.swo
+.DS_Store
+/.tools/
+/nvim.tar.gz
+/nvim-linux-x86_64/
+/stylua.zip

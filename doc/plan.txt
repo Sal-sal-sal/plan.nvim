@@ -1,0 +1,83 @@
+*plan.txt*  Plain-text plans with a Rust engine
+
+===============================================================================
+CONTENTS                                                       *plan.nvim*
+
+1. Setup                                                       |plan-setup|
+2. Syntax                                                      |plan-syntax|
+3. Commands                                                    |plan-commands|
+4. Display                                                     |plan-display|
+
+===============================================================================
+1. SETUP                                                       *plan-setup*
+
+Requires Neovim 0.10+ and a built plan-nvim executable.
+Build in the plugin directory:
+>
+  cargo build --release --locked --target-dir target
+<
+Configure:
+>lua
+  require("plan").setup({
+    mappings = true,
+    icons = true,
+    animation = true,
+    debounce = 100,
+    -- binary = "/absolute/path/to/plan-nvim",
+  })
+<
+Release binaries can be used instead of building from source.
+Use :checkhealth plan to check your installation.
+
+===============================================================================
+2. SYNTAX                                                      *plan-syntax*
+
+[] Task                  Pending task (also accepts [ ]).
+[x] Task                 Completed task (also accepts [X]).
+* Pointer                A note or pointer.
+# Heading                A heading; supports one to six # characters.
+
+Markers must begin at column one.
+Inline and indented markers are ordinary text.
+Normal-mode <Enter> toggles the current task.
+Insert-mode <Enter> continues a task/pointer, or leaves an empty list item.
+
+===============================================================================
+3. COMMANDS                                                    *plan-commands*
+
+:PlanToggle                                                    *:PlanToggle*
+    Toggle the task on the cursor line. Also mapped to <leader>pt.
+:PlanStats                                                     *:PlanStats*
+    Show completed, pending, total, percentage and pointers. <leader>ps.
+:PlanNext                                                      *:PlanNext*
+    Jump to the next pending task. Also mapped to ]t.
+:PlanPrev                                                      *:PlanPrev*
+    Jump to the previous pending task. Also mapped to [t.
+:PlanBuild                                                     *:PlanBuild*
+    Build the Rust engine asynchronously with Cargo.
+
+The editing commands and mappings are buffer-local.
+Task navigation stops at the beginning/end instead of wrapping.
+
+===============================================================================
+4. DISPLAY                                                     *plan-display*
+
+Pending tasks have a gold circle.
+Completed tasks have a green check and bold, green, struck-through text.
+The selected completed row has a dark green background.
+Completion alternates a filled/hollow star at 150 ms intervals for 900 ms.
+The display effect matches the term-todos accomplishment style.
+Symbols are decorations; the saved file retains [] and [x].
+Insert mode shows the literal checkbox syntax.
+Set icons=false for literal markers, or animation=false for reduced motion.
+
+Highlight groups:
+    PlanTodo, PlanTodoText, PlanDone, PlanDoneText,
+    PlanDoneFocus, PlanPointer, PlanHeading
+
+require("plan").status() returns a statusline label such as "Plan 2/5".
+vim.b.plan_stats contains the latest statistics.
+User PlanUpdated fires after a render with data.buf identifying its buffer.
+
+ vim:tw=78:ts=8:ft=help:norl:
+
